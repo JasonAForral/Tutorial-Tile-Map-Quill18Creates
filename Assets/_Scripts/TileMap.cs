@@ -4,18 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
+
+[ExecuteInEditMode]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
 public class TileMap : MonoBehaviour 
 {
-    bool centered = true;
+    public bool centered = true;
 
     //vector2 tileCount = new vector2(3, 2
     
-    int tileCountX = 100;
-    int tileCountY = 50;
-    float tileSize = 0.1f;
+    public int tileCountX = 100;
+    public int tileCountY = 50;
+    public float tileSize = 0.1f;
+    public float randomHeight = 1f;
+    public Vector3 offset;
+    
     void Awake () {
 
         BuildMesh();
@@ -28,9 +33,9 @@ public class TileMap : MonoBehaviour
 	
 	}
 
-    void BuildMesh ()
+    public void BuildMesh ()
     {
-        Vector3 offset = Vector3.zero;
+        offset = Vector3.zero;
         if (centered)
         {
             offset = new Vector3(tileCountX, 0f, tileCountY) * tileSize * 0.5f;
@@ -40,8 +45,8 @@ public class TileMap : MonoBehaviour
         int vertexCountX = tileCountX + 1;
         int vertexCountY = tileCountY + 1;
 
-        float vectorCountReciprocalX = 1 / vertexCountX;
-        float vectorCountReciprocalY = 1 / vertexCountY;
+        float vectorCountReciprocalX = 1 / (float)vertexCountX;
+        float vectorCountReciprocalY = 1 / (float)vertexCountY;
 
         int numVerts = vertexCountX * vertexCountY;
         
@@ -58,10 +63,13 @@ public class TileMap : MonoBehaviour
         {
             for (int z = 0; z < vertexCountY; z++)
             {
+
                 int vertexCount = z + x * vertexCountY;
-                vertecies[vertexCount] = new Vector3(x, 0f, z) * tileSize - offset;
+                vertecies[vertexCount] = new Vector3(x, Random.Range(-0.5f, 0.5f) * randomHeight, z) * tileSize - offset;
                 normals[vertexCount] = Vector3.up;
                 uv[vertexCount] = new Vector2(x * vectorCountReciprocalX, z * vectorCountReciprocalY);
+
+                //Debug.Log(Mathf.PerlinNoise((float)vertexCountX * vectorCountReciprocalX, (float)vertexCountY * vectorCountReciprocalY));
             }
         }
 
@@ -102,13 +110,13 @@ public class TileMap : MonoBehaviour
         // Assign mesh to object components
 
         MeshFilter meshFilter = GetComponent<MeshFilter>();
-        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
         MeshCollider meshCollider = GetComponent<MeshCollider>();
 
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
-        
 
+        
     }
 }
 
