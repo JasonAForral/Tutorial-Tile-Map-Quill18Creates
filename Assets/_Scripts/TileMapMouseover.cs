@@ -4,8 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(TileMap))]
 public class TileMapMouseover : MonoBehaviour {
 
-    private Collider collider;
-    private Renderer renderer;
+    private Collider _collider;
+    //private Renderer renderer;
 
     private Vector3 mousePosition;
 
@@ -20,10 +20,10 @@ public class TileMapMouseover : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-        collider = GetComponent<Collider>();
-        renderer = GetComponent<Renderer>();
+        _collider = GetComponent<Collider>();
+        //renderer = GetComponent<Renderer>();
         tileMap = GetComponent<TileMap>();
-        selectionCube = transform.Find("Cube").transform;
+        selectionCube = transform.Find("Cube");
 
         tileSizeReciprocal = 1.0f / (float)tileMap.tileSize;
 
@@ -35,7 +35,10 @@ public class TileMapMouseover : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        MouseOver();
+        if (Input.GetButton("Fire1"))
+            MouseOver();
+        if (Input.GetButtonUp("Fire1"))
+            selectionCube.gameObject.SetActive(false);
 	
 	}
 
@@ -44,19 +47,19 @@ public class TileMapMouseover : MonoBehaviour {
         mousePosition = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-
-
-        if (collider.Raycast(ray, out hit, Mathf.Infinity))
+        
+        if (_collider.Raycast(ray, out hit, Mathf.Infinity))
         {
+            selectionCube.gameObject.SetActive(true);
             mousePosition = (hit.point - transform.position + tileMap.offset) * tileSizeReciprocal;
             x = Mathf.RoundToInt(mousePosition.x - 0.5f);
             z = Mathf.RoundToInt(mousePosition.z - 0.5f);
             hoverTile = new Vector3(x, 0f, z);
-            selectionCube.position = new Vector3(x + 0.5f, 0.5f, z + 0.5f) * tileMap.tileSize - tileMap.offset;
+            selectionCube.position = (hoverTile + Vector3.one * 0.5f) * tileMap.tileSize - tileMap.offset;
         }
         else
         {
-
+            selectionCube.gameObject.SetActive(false);
         }
     }
 }

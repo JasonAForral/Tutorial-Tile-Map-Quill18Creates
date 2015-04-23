@@ -15,23 +15,81 @@ public class TileMap : MonoBehaviour
 
     //vector2 tileCount = new vector2(3, 2
     
-    public int tileCountX = 100;
-    public int tileCountY = 50;
-    public float tileSize = 0.1f;
+    public int tileCountX = 1;
+    public int tileCountY = 1;
+    public float tileSize = 1f;
     public float randomHeight = 1f;
     public Vector3 offset;
-    
+    public float perlinScale = 1f;
+    int vertexCountX;
+    int vertexCountY;
+    //Vector3 tileTable;
+
+    float tileCountReciprocalX;
+    float tileCountReciprocalY;
+
+    float vertexCountReciprocalX;
+    float vertexCountReciprocalY;
+
+    float perlinOrgX;
+    float perlinOrgY;
+
     void Awake () {
 
+        Initialize();
+        BuildTexture();
         BuildMesh();
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        
 
-	
 	}
+
+    public void Initialize ()
+    {
+        //tileTable = 
+
+        tileCountReciprocalX = 1f / (float)tileCountX;
+        tileCountReciprocalY = 1f / (float)tileCountY;
+        //Debug.Log(tileCountX + ", " + tileCountY);
+
+        vertexCountX = tileCountX + 1;
+        vertexCountY = tileCountY + 1;
+
+        vertexCountReciprocalX = 1f / (float)vertexCountX;
+        vertexCountReciprocalY = 1f / (float)vertexCountY;
+
+        perlinOrgX = Random.Range(0f, 100f);
+        perlinOrgY = Random.Range(0f, 100f);
+
+    }
+
+    public void BuildTexture ()
+    {
+        //Debug.Log(tileCountX + ", " + tileCountY);
+        int textureWidth = 100;
+        int textureHeight = 100;
+        Texture2D texture = new Texture2D(textureWidth, textureWidth);
+
+        for (int y = 0; y < textureHeight; y++)
+        {
+                for (int x = 0; x < textureWidth; x++)
+            {
+                //Debug.Log(x + ", " + y);
+                float perlinShade = Mathf.PerlinNoise((x + perlinOrgX) * vertexCountReciprocalX * perlinScale, (y + perlinOrgX) * vertexCountReciprocalY * perlinScale);
+                texture.SetPixel(x, y, new Color(perlinShade, perlinShade, perlinShade));//, perlinShade));
+            }
+        }
+        texture.filterMode = FilterMode.Point;
+        texture.name = "Perlin Noise";
+
+        Debug.Log(texture.height);
+        texture.Apply();
+
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+
+        meshRenderer.sharedMaterial.mainTexture = texture;
+        
+
+    }
 
     public void BuildMesh ()
     {
@@ -42,12 +100,7 @@ public class TileMap : MonoBehaviour
             
         }
 	
-        int vertexCountX = tileCountX + 1;
-        int vertexCountY = tileCountY + 1;
-
-        float vectorCountReciprocalX = 1 / (float)vertexCountX;
-        float vectorCountReciprocalY = 1 / (float)vertexCountY;
-
+        
         int numVerts = vertexCountX * vertexCountY;
         
         int numTiles = tileCountX * tileCountY;
@@ -64,12 +117,15 @@ public class TileMap : MonoBehaviour
             for (int z = 0; z < vertexCountY; z++)
             {
 
-                int vertexCount = z + x * vertexCountY;
-                vertecies[vertexCount] = new Vector3(x, Random.Range(-0.5f, 0.5f) * randomHeight, z) * tileSize - offset;
-                normals[vertexCount] = Vector3.up;
-                uv[vertexCount] = new Vector2(x * vectorCountReciprocalX, z * vectorCountReciprocalY);
+                int vertexCountIndex = z + x * vertexCountY;
+                //Debug.Log(vertexCountIndex);
+                vertecies[vertexCountIndex] = new Vector3(x, (Mathf.PerlinNoise(x * vertexCountReciprocalX * perlinScale, z * vertexCountReciprocalY * perlinScale) - 0.5f) * randomHeight, z) * tileSize - offset;
+                normals[vertexCountIndex] = Vector3.up;
+                uv[vertexCountIndex] = new Vector2(x * tileCountReciprocalX, z * tileCountReciprocalY);
 
-                //Debug.Log(Mathf.PerlinNoise((float)vertexCountX * vectorCountReciprocalX, (float)vertexCountY * vectorCountReciprocalY));
+                //Debug.Log(Mathf.PerlinNoise(x * vectorCountReciprocalX, z * vectorCountReciprocalY));
+                //Debug.Log(x + ", " + z + ": " + x * tileCountReciprocalX + ", " + z * tileCountReciprocalY);
+                //Debug.Log(x + ", " + z + ": " + new Vector2(x * tileCountReciprocalX, z * tileCountReciprocalY));
             }
         }
 
@@ -77,16 +133,16 @@ public class TileMap : MonoBehaviour
         {
             for (int z = 0; z < tileCountY; z++)
             {
-                int tileCoord = 6 * (z + x * tileCountY);
+                int tileCoordIndex = 6 * (z + x * tileCountY);
                 int vertexCoord = (z + x * vertexCountY);
 
-                triangles[tileCoord + 0] = vertexCoord + 0;
-                triangles[tileCoord + 1] = vertexCoord + 1;
-                triangles[tileCoord + 2] = vertexCoord + 1 + vertexCountY;
+                triangles[tileCoordIndex + 0] = vertexCoord + 0;
+                triangles[tileCoordIndex + 1] = vertexCoord + 1;
+                triangles[tileCoordIndex + 2] = vertexCoord + 1 + vertexCountY;
 
-                triangles[tileCoord + 3] = vertexCoord + 0;
-                triangles[tileCoord + 4] = vertexCoord + 1 + vertexCountY;
-                triangles[tileCoord + 5] = vertexCoord + vertexCountY;
+                triangles[tileCoordIndex + 3] = vertexCoord + 0;
+                triangles[tileCoordIndex + 4] = vertexCoord + 1 + vertexCountY;
+                triangles[tileCoordIndex + 5] = vertexCoord + vertexCountY;
             }
         }
 
@@ -97,6 +153,7 @@ public class TileMap : MonoBehaviour
         // create new mesh and populate with the data
         
         Mesh mesh = new Mesh();
+        mesh.Clear();
 
         mesh.name = "TileMesh"; 
         mesh.vertices = vertecies;
@@ -110,10 +167,11 @@ public class TileMap : MonoBehaviour
         // Assign mesh to object components
 
         MeshFilter meshFilter = GetComponent<MeshFilter>();
-        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
         MeshCollider meshCollider = GetComponent<MeshCollider>();
 
-        meshFilter.mesh = mesh;
+        //meshFilter..Clear();
+
+        meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
 
         

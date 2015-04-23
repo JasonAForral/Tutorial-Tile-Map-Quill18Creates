@@ -27,6 +27,8 @@ public class TileMapEditor : Editor {
         if (GUILayout.Button("Regenerate"))
         {
             TileMap tileMap = (TileMap)target;
+            tileMap.Initialize();
+            tileMap.BuildTexture();
             tileMap.BuildMesh();
         }
     }
