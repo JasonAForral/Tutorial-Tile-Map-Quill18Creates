@@ -9,10 +9,14 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(MeshCollider))]
 public class TileMap : MonoBehaviour 
 {
+    bool centered = true;
 
-
-
-	void Awake () {
+    //vector2 tileCount = new vector2(3, 2
+    
+    int tileCountX = 100;
+    int tileCountY = 50;
+    float tileSize = 0.1f;
+    void Awake () {
 
         BuildMesh();
 	
@@ -26,67 +30,67 @@ public class TileMap : MonoBehaviour
 
     void BuildMesh ()
     {
-        int width = 2;
-        int height = 2;
-        int count = 0;
-
-        // generate Mesh D
-        Vector3[] vertecies = new Vector3[height * width];
-        int[] triangles = new int[6];
-        Vector3[] normals = new Vector3[height * width];
-        Vector2[] uv = new Vector2[4];
-
-        count = 0;
-        for (int x = 0; x < width; x++)
+        Vector3 offset = Vector3.zero;
+        if (centered)
         {
-            for (int y = 0; y < height; y++)
+            offset = new Vector3(tileCountX, 0f, tileCountY) * tileSize * 0.5f;
+            
+        }
+	
+        int vertexCountX = tileCountX + 1;
+        int vertexCountY = tileCountY + 1;
+
+        float vectorCountReciprocalX = 1 / vertexCountX;
+        float vectorCountReciprocalY = 1 / vertexCountY;
+
+        int numVerts = vertexCountX * vertexCountY;
+        
+        int numTiles = tileCountX * tileCountY;
+        int numTriangles = numTiles * 2;
+        
+        // generate Mesh Data
+        Vector3[] vertecies = new Vector3[numVerts];
+        int[] triangles = new int[numTriangles * 6];
+        Vector3[] normals = new Vector3[numVerts];
+        Vector2[] uv = new Vector2[numVerts];
+
+        for (int x = 0; x < vertexCountX; x++)
+        {
+            for (int z = 0; z < vertexCountY; z++)
             {
-                vertecies[count] = new Vector3(x, 0f, y);
-                count++;
+                int vertexCount = z + x * vertexCountY;
+                vertecies[vertexCount] = new Vector3(x, 0f, z) * tileSize - offset;
+                normals[vertexCount] = Vector3.up;
+                uv[vertexCount] = new Vector2(x * vectorCountReciprocalX, z * vectorCountReciprocalY);
             }
         }
 
-        //vertecies[0] = new Vector3(0f, 0f, 0f);
-        //vertecies[1] = new Vector3(0f, 0f, 1f);
-        //vertecies[2] = new Vector3(1f, 0f, 0f);
-        //vertecies[3] = new Vector3(1f, 0f, 1f);
-
-        triangles[0] = 0;
-        triangles[1] = 1;
-        triangles[2] = 3;
-        
-        triangles[3] = 0;
-        triangles[4] = 3;
-        triangles[5] = 2;
-
-        //triangles[6] = 2;
-        //triangles[7] = 3;
-        //triangles[8] = 5;
-
-        //triangles[9] = 2;
-        //triangles[10] = 5;
-        //triangles[11] = 4;
-
-        for (int normCount = 0; normCount < normals.Length; normCount++)
+        for (int x = 0; x < tileCountX; x++)
         {
-            normals[normCount] = Vector3.up;
+            for (int z = 0; z < tileCountY; z++)
+            {
+                int tileCoord = 6 * (z + x * tileCountY);
+                int vertexCoord = (z + x * vertexCountY);
+
+                triangles[tileCoord + 0] = vertexCoord + 0;
+                triangles[tileCoord + 1] = vertexCoord + 1;
+                triangles[tileCoord + 2] = vertexCoord + 1 + vertexCountY;
+
+                triangles[tileCoord + 3] = vertexCoord + 0;
+                triangles[tileCoord + 4] = vertexCoord + 1 + vertexCountY;
+                triangles[tileCoord + 5] = vertexCoord + vertexCountY;
+            }
         }
 
-        //normals[0] = Vector3.up;
-        //normals[1] = Vector3.up;
-        //normals[2] = Vector3.up;
-        //normals[3] = Vector3.up;
 
-        uv[0] = new Vector2(0, 0);
-        uv[1] = new Vector2(0, 1);
-        uv[2] = new Vector2(1, 0);
-        uv[3] = new Vector2(1, 1);
+
+        // 0, 1, 3, 0, 3, 2
 
         // create new mesh and populate with the data
         
         Mesh mesh = new Mesh();
 
-        mesh.name = "The Mesh"; 
+        mesh.name = "TileMesh"; 
         mesh.vertices = vertecies;
         mesh.triangles = triangles;
         mesh.normals = normals;
