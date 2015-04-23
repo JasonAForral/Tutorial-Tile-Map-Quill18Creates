@@ -4,6 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(TileMap))]
 public class TileMapMouseover : MonoBehaviour {
 
+    [Tooltip("Make lots of these")]
+    public GameObject prefabSphere;
     private Collider _collider;
     //private Renderer renderer;
 
@@ -28,6 +30,7 @@ public class TileMapMouseover : MonoBehaviour {
         tileSizeReciprocal = 1.0f / (float)tileMap.tileSize;
 
         selectionCube.localScale = Vector3.one * tileMap.tileSize;
+
         
 	
 	}
@@ -38,7 +41,15 @@ public class TileMapMouseover : MonoBehaviour {
         if (Input.GetButton("Fire1"))
             MouseOver();
         if (Input.GetButtonUp("Fire1"))
+        {
             selectionCube.gameObject.SetActive(false);
+            //sphere.position = (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset;
+            //sphere.velocity = Vector3.up;
+            //sphere.angularVelocity = Vector3.zero;
+            //Debug.Log("dropped");
+            //Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+        
+        }
 	
 	}
 
@@ -56,10 +67,8 @@ public class TileMapMouseover : MonoBehaviour {
             z = Mathf.RoundToInt(mousePosition.z - 0.5f);
             hoverTile = new Vector3(x, 0f, z);
             selectionCube.position = (hoverTile + Vector3.one * 0.5f) * tileMap.tileSize - tileMap.offset;
-        }
-        else
-        {
-            selectionCube.gameObject.SetActive(false);
+            Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+            
         }
     }
 }

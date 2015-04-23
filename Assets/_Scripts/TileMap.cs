@@ -74,7 +74,7 @@ public class TileMap : MonoBehaviour
                 for (int x = 0; x < textureWidth; x++)
             {
                 //Debug.Log(x + ", " + y);
-                float perlinShade = Mathf.PerlinNoise((x + perlinOrgX) * vertexCountReciprocalX * perlinScale, (y + perlinOrgX) * vertexCountReciprocalY * perlinScale);
+                float perlinShade = CustomPerlinNoise ( x,  y);
                 texture.SetPixel(x, y, new Color(perlinShade, perlinShade, perlinShade));//, perlinShade));
             }
         }
@@ -119,7 +119,7 @@ public class TileMap : MonoBehaviour
 
                 int vertexCountIndex = z + x * vertexCountY;
                 //Debug.Log(vertexCountIndex);
-                vertecies[vertexCountIndex] = new Vector3(x, (Mathf.PerlinNoise(x * vertexCountReciprocalX * perlinScale, z * vertexCountReciprocalY * perlinScale) - 0.5f) * randomHeight, z) * tileSize - offset;
+                vertecies[vertexCountIndex] = new Vector3(x, (CustomPerlinNoise(x, z) - 0.5f) * randomHeight, z) * tileSize - offset;
                 normals[vertexCountIndex] = Vector3.up;
                 uv[vertexCountIndex] = new Vector2(x * tileCountReciprocalX, z * tileCountReciprocalY);
 
@@ -175,6 +175,11 @@ public class TileMap : MonoBehaviour
         meshCollider.sharedMesh = mesh;
 
         
+    }
+
+    float CustomPerlinNoise (int x, int y)
+    {
+        return Mathf.PerlinNoise(((float)x + perlinOrgX) * vertexCountReciprocalX * perlinScale, ((float)y + perlinOrgX) * vertexCountReciprocalY * perlinScale);
     }
 }
 
