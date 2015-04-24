@@ -204,10 +204,10 @@ public class TileMap : MonoBehaviour
         mesh.normals = normals;
         mesh.uv = uv;
 
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
         mesh.Optimize();
-
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+        
         // Assign mesh to object components
 
         MeshFilter meshFilter = GetComponent<MeshFilter>();
