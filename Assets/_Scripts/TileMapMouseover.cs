@@ -18,6 +18,9 @@ public class TileMapMouseover : MonoBehaviour {
     public Vector3 hoverTile;
     private int x;
     private int z;
+
+    [Tooltip("When True, continueously spawn")]
+    public bool spawnFastMode;
             
 
 	// Use this for initialization
@@ -40,14 +43,19 @@ public class TileMapMouseover : MonoBehaviour {
 
         if (Input.GetButton("Fire1"))
             MouseOver();
+        if (Input.GetButton("Fire2"))
+            selectionCube.gameObject.SetActive(false);
         if (Input.GetButtonUp("Fire1"))
         {
-            selectionCube.gameObject.SetActive(false);
+            //selectionCube.gameObject.SetActive(false);
             //sphere.position = (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset;
             //sphere.velocity = Vector3.up;
             //sphere.angularVelocity = Vector3.zero;
             //Debug.Log("dropped");
-            //Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+            if (!spawnFastMode)
+            {
+                Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+            }
         
         }
 	
@@ -67,8 +75,10 @@ public class TileMapMouseover : MonoBehaviour {
             z = Mathf.RoundToInt(mousePosition.z - 0.5f);
             hoverTile = new Vector3(x, 0f, z);
             selectionCube.position = (hoverTile + Vector3.one * 0.5f) * tileMap.tileSize - tileMap.offset;
-            Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
-            
+            if (spawnFastMode)
+            {
+                Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+            }
         }
     }
 }

@@ -34,6 +34,10 @@ public class TileMap : MonoBehaviour
     float perlinOrgX;
     float perlinOrgY;
 
+    public Texture2D terrainTiles;
+    public int tileResolution;
+    
+
     void Awake () {
 
         Initialize();
@@ -60,28 +64,67 @@ public class TileMap : MonoBehaviour
         perlinOrgX = Random.Range(0f, 100f);
         perlinOrgY = Random.Range(0f, 100f);
 
+        //terrainTiles.
+
+    }
+
+    Color[][] GetTiles ()
+    {
+        int numTilesPerRow = terrainTiles.width / tileResolution;
+        int numRows = terrainTiles.height / tileResolution;
+
+        Color[][] pixels = new Color[4][];
+
+        //pixels[0] = terrainTiles.GetPixels(0, 0, 16, 16);
+        //pixels[1] = terrainTiles.GetPixels(16, 0, 16, 16);
+        //pixels[2] = terrainTiles.GetPixels(32, 0, 16, 16);
+        //pixels[3] = terrainTiles.GetPixels(48, 0, 16, 16);
+
+        for (int y = 0; y < numRows; y++)
+        {
+            for (int x = 0; x < numTilesPerRow; x++)
+            {
+                int index = y * numTilesPerRow + x;
+                pixels[index] = terrainTiles.GetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution);
+
+                //Debug.Log("(" + x + ", " + y + ")// pixels[" + y * numTilesPerRow + x + "] = ~~~GetPixels( " + x * tileResolution + ", " + y * tileResolution + ", " + tileResolution + ", " + tileResolution + ")");
+
+
+            }
+        }
+
+
+        return pixels;
     }
 
     public void BuildTexture ()
     {
-        //Debug.Log(tileCountX + ", " + tileCountY);
-        int textureWidth = 100;
-        int textureHeight = 100;
+
+        int tileResolution = terrainTiles.height;
+
+        int textureWidth = tileCountX * tileResolution;
+        int textureHeight =  tileCountY * tileResolution;
+
+
         Texture2D texture = new Texture2D(textureWidth, textureWidth);
 
-        for (int y = 0; y < textureHeight; y++)
+        Color[][] tilePixels = GetTiles();
+
+        for (int y = 0; y < tileCountX; y++)
         {
-                for (int x = 0; x < textureWidth; x++)
+            for (int x = 0; x < tileCountY; x++)
             {
                 //Debug.Log(x + ", " + y);
-                float perlinShade = CustomPerlinNoise ( x,  y);
-                texture.SetPixel(x, y, new Color(perlinShade, perlinShade, perlinShade));//, perlinShade));
+                int perlinShade = Mathf.Clamp(Mathf.FloorToInt(CustomPerlinNoise(x + 0.5f, y + 0.5f) * 5), 0, 3);
+                //Debug.Log(perlinShade);
+                //texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, tilePixels);
+                //Color[] p =
+                texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, tilePixels[perlinShade]);
             }
         }
-        texture.filterMode = FilterMode.Point;
+        texture.filterMode = FilterMode.Trilinear;
         texture.name = "Perlin Noise";
 
-        Debug.Log(texture.height);
         texture.Apply();
 
         MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
@@ -161,6 +204,7 @@ public class TileMap : MonoBehaviour
         mesh.normals = normals;
         mesh.uv = uv;
 
+        mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         mesh.Optimize();
 
@@ -177,9 +221,9 @@ public class TileMap : MonoBehaviour
         
     }
 
-    float CustomPerlinNoise (int x, int y)
+    float CustomPerlinNoise (float x, float y)
     {
-        return Mathf.PerlinNoise(((float)x + perlinOrgX) * vertexCountReciprocalX * perlinScale, ((float)y + perlinOrgX) * vertexCountReciprocalY * perlinScale);
+        return Mathf.PerlinNoise((x + perlinOrgX) * vertexCountReciprocalX * perlinScale, (y + perlinOrgY) * vertexCountReciprocalY * perlinScale);
     }
 }
 
