@@ -61,23 +61,35 @@ public class TileMapMouseover : MonoBehaviour {
 	
 	}
 
+    float mouseOverTimer = 0f;
+    public float raycastInterval = 0.2f;
+
     void MouseOver ()
     {
-        mousePosition = Input.mousePosition;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        
-        if (_collider.Raycast(ray, out hit, Mathf.Infinity))
+        if (mouseOverTimer < raycastInterval)
         {
-            selectionCube.gameObject.SetActive(true);
-            mousePosition = (hit.point - transform.position + tileMap.offset) * tileSizeReciprocal;
-            x = Mathf.RoundToInt(mousePosition.x - 0.5f);
-            z = Mathf.RoundToInt(mousePosition.z - 0.5f);
-            hoverTile = new Vector3(x, 0f, z);
-            selectionCube.position = (hoverTile + Vector3.one * 0.5f) * tileMap.tileSize - tileMap.offset;
-            if (spawnFastMode)
+            mouseOverTimer += Time.deltaTime;
+            return;
+        }
+        else
+        {
+            mouseOverTimer = 0f;
+            mousePosition = Input.mousePosition;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (_collider.Raycast(ray, out hit, Mathf.Infinity))
             {
-                Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+                selectionCube.gameObject.SetActive(true);
+                mousePosition = (hit.point - transform.position + tileMap.offset) * tileSizeReciprocal;
+                x = Mathf.RoundToInt(mousePosition.x - 0.5f);
+                z = Mathf.RoundToInt(mousePosition.z - 0.5f);
+                hoverTile = new Vector3(x, 0f, z);
+                selectionCube.position = (hoverTile + Vector3.one * 0.5f) * tileMap.tileSize - tileMap.offset;
+                if (spawnFastMode)
+                {
+                    Rigidbody newSphere =  Instantiate(prefabSphere, (hoverTile + Vector3.one * 0.5f + Vector3.up * 5f) * tileMap.tileSize - tileMap.offset, Quaternion.identity) as Rigidbody;
+                }
             }
         }
     }

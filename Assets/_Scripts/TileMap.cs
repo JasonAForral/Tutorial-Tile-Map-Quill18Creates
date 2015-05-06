@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
+using TileData;
 
 
 [ExecuteInEditMode]
@@ -43,7 +44,6 @@ public class TileMap : MonoBehaviour
         Initialize();
         BuildTexture();
         BuildMesh();
-        
 
 	}
 

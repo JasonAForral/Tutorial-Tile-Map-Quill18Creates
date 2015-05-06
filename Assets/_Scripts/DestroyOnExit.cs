@@ -16,4 +16,5 @@ public class DestroyOnExit : MonoBehaviour {
     {
         Destroy(other.gameObject);
     }
+    
 }
